@@ -159,7 +159,7 @@ class FCN:
 
     def add_linear_output_layer(self, last_hidden_layer, ground_truth, corpus_tag, task_tag, loss_weight=1):
         with tf.variable_scope("output_layer_%s" % task_tag) as layer_scope:
-            output_dim = ground_truth.shape[1].value
+            output_dim = ground_truth.shape[1].value if len(ground_truth.shape) > 1 else 1
             last_out = fully_connected(last_hidden_layer, output_dim, activation_fn=tf.identity,
                                        weights_regularizer=self.l1_l2_regularizer,
                                        scope=layer_scope)
@@ -191,6 +191,7 @@ class FCN:
             # utils.variable_summaries(accuracy, "accuracy", corpus_tag)
             self.variable_summaries(accuracy, "accuracy", task_tag)
             self.accuracy = accuracy
+
 
     def add_all_outputs_and_losses(self, input_features, ground_truth, reg_ground_truth, corpus_tag):
         hidden_output = self.make_hidden_FN_layers(input_features)

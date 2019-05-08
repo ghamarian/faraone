@@ -65,7 +65,8 @@ class FCNRunner:
         self.train_loss = self.network.loss
         self.train_str_accu = self.network.streaming_accu_op
         self.train_accuracy = self.network.accuracy
-        self.train_auc = self.network.auc
+        if self.network.ground_truth_slicer is not None:
+            self.valid_auc = self.network.auc
 
         self.train_summaries_merged = self.network.get_summaries()
 
@@ -150,24 +151,30 @@ class FCNRunner:
         feed_dict = {self.network.keep_prob: self.keep_prob,
                      self.network.is_training: True,
                      self.network.input_features_placeholder: input_batch}
+        tensors = [self.train_op, self.train_loss, self.train_summaries_merged, self.train_accuracy,
+                   self.train_str_accu]
 
         if label_batch is not None:
             feed_dict.update({self.network.input_label_placeholder: label_batch})
+            tensors.append(self.train_auc)
+            _, train_loss, training_summary, training_accuracy, train_streaming_accuracy, train_auc = self.session.run(
+                tensors, feed_dict=feed_dict)
 
         if reg_label_batch is not None:
             feed_dict.update({self.network.reg_input_placeholder: reg_label_batch})
-
-        _, train_loss, training_summary, training_accuracy, train_streaming_accuracy, train_auc = self.session.run(
-            [self.train_op, self.train_loss, self.train_summaries_merged, self.train_accuracy, self.train_str_accu,
-             self.train_auc],
-            feed_dict=feed_dict)
+            _, train_loss, training_summary, training_accuracy, train_streaming_accuracy = self.session.run(
+                tensors, feed_dict=feed_dict)
 
         self.train_summary_writer.add_summary(training_summary, i)
 
         print("Training at the end of iteration %i (epoch %i):\tAccuracy:\t%f\tStreaming Accu:\t%f\tloss:\t%f" % (
             i, epoch, training_accuracy, train_streaming_accuracy, train_loss))
         self.train_summary_writer.flush()
-        return train_streaming_accuracy, train_auc[0]
+
+        if label_batch is not None:
+            return train_streaming_accuracy, train_auc[0]
+        else:
+            return train_streaming_accuracy, 0
 
     def load_checkpoint(self, path):
         self.saver = tf.train.import_meta_graph('%s.meta' % path)
@@ -296,7 +303,7 @@ class FCNRunner:
         for i in range(1, self.num_epochs + 1):
             train_auc_vector = []
 
-            if self.network.stratified:
+            if hasattr(self.network, 'stratified') and self.network.stratified:
                 batches = self.split_to_batches_stratified(train_values, stratifier)
             else:
                 batches = self.split_to_batches(train_values, self.batch_size)

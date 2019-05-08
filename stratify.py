@@ -1,4 +1,4 @@
-from sklearn.cross_validation import BaseShuffleSplit, _validate_shuffle_split, _approximate_mode
+from sklearn.model_selection._split import BaseShuffleSplit, _approximate_mode
 from sklearn.utils import check_random_state, check_array
 import numpy as np
 from sklearn.utils.validation import _num_samples, indexable
@@ -74,6 +74,6 @@ if __name__ == '__main__':
     y = np.array([1] * 2 + [2] * 25 + [3] * 35 + [4] * 38)
     X = np.arange(100)
 
-    s = StratifiedShuffle(X, y, 3)
+    s = StratifiedShuffle(X, y, 4)
     for x in s.split():
         print(X[x], y[x])
