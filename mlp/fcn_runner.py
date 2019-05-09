@@ -66,7 +66,7 @@ class FCNRunner:
         self.train_str_accu = self.network.streaming_accu_op
         self.train_accuracy = self.network.accuracy
         if self.network.ground_truth_slicer is not None:
-            self.valid_auc = self.network.auc
+            self.train_auc = self.network.auc
 
         self.train_summaries_merged = self.network.get_summaries()
 
