@@ -79,6 +79,7 @@ def optimize():
         f.write("Loss : " + str(1 - tr['result']['loss']) + ", ")
         f.write("Valid auc : " + str(1 - tr['result']['valid_auc']) + ", ")
         f.write("Train streaming accuracy : " + str(tr['result']['train_accu_str']) + ", ")
+        f.write("Validation loss " + str(tr['result']['valid_loss']))
         f.write("Train auc: " + str(tr['result']['train_auc']) + "\n")
         f.write("*" * 100 + "\n")
     f.close()

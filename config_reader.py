@@ -9,7 +9,7 @@ class My_Config_Parser(configparser.ConfigParser):
 
     def get_as_slice(self, num_cols, *args, **kwargs):
         raw_get = self.get(*args, **kwargs)
-        matcher = re.search('(-?\d)*:(-?\d)*', raw_get)
+        matcher = re.search('(-?\d*):(-?\d*)', raw_get)
 
         if ':' in raw_get:
             if matcher.group(1) and matcher.group(2):
